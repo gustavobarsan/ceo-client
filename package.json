@@ -1,0 +1,20 @@
+{
+  "name": "ceo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.11.3",
+    "@grpc/proto-loader": "^0.7.13"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}
