@@ -1,7 +1,8 @@
-import * as grpc from "@grpc/grpc-js"
-import * as protoLoader from "@grpc/proto-loader"
+import * as grpc from "@grpc/grpc-js";
+import * as protoLoader from "@grpc/proto-loader";
+import path from 'path';
 
-const PROTO_PATH = "./pubsub.proto"
+const PROTO_PATH = path.resolve(__dirname, '../protos/pubsub.proto');
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
@@ -9,52 +10,62 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   enums: String,
   defaults: true,
   oneofs: true,
-})
+});
 
-const proto = grpc.loadPackageDefinition(packageDefinition) as any
+const proto = grpc.loadPackageDefinition(packageDefinition) as any;
 
-export default class Ceo {
-  private client: any
-  private subscriptions: Map<string, grpc.ClientDuplexStream<any, any>>
+export class Ceo {
+  private client: any;
+  private subscriptions: Map<string, grpc.ClientDuplexStream<any, any>>;
 
   constructor(host: string) {
-    this.client = new proto.PubSubService(
+    this.client = new proto.pubsub.PubSubService(
       host,
       grpc.credentials.createInsecure()
-    )
-    this.subscriptions = new Map() // Para armazenar as inscrições ativas
+    );
+    this.subscriptions = new Map(); // Para armazenar as inscrições ativas
   }
 
   pub(topic: string, callback: () => string) {
-    const message = callback()
+    const message = callback();
+    if (!message) {
+      console.error("Message cannot be empty");
+      return;
+    }
+
     this.client.publish({ topic, message }, (error: any) => {
       if (error) {
-        console.error("Error publishing:", error)
+        console.error("Error publishing:", error);
       }
-    })
+    });
   }
 
   sub(topic: string, onMessage: (message: string) => void) {
-    const call = this.client.subscribe({ topic })
-    this.subscriptions.set(topic, call)
+    console.log(`Subscribing to topic: ${topic}`);
+    const call = this.client.subscribe({ topic });
+    this.subscriptions.set(topic, call);
 
     call.on("data", (response: any) => {
-      onMessage(response.message) // Chama o callback quando uma nova mensagem for recebida
-    })
+      onMessage(response.message);
+    });
 
     call.on("end", () => {
-      console.log("End of stream")
-    })
+      console.log(`End of stream for topic: ${topic}`);
+    });
+
+    call.on("error", (error: any) => {
+      console.error(`Error in subscription for topic ${topic}:`, error);
+    });
   }
 
   unsub(topic: string) {
-    const call = this.subscriptions.get(topic)
+    const call = this.subscriptions.get(topic);
     if (call) {
-      call.cancel() // Cancela a assinatura
-      this.subscriptions.delete(topic) // Remove a assinatura do mapa
-      console.log(`Unsubscribed from topic: ${topic}`)
+      call.cancel(); // Cancela a assinatura
+      this.subscriptions.delete(topic); // Remove a assinatura do mapa
+      console.log(`Unsubscribed from topic: ${topic}`);
     } else {
-      console.warn(`No subscription found for topic: ${topic}`)
+      console.warn(`No subscription found for topic: ${topic}`);
     }
   }
 }

@@ -1,1 +1,1 @@
-export { default } from './client';
+export { Ceo } from './client';
