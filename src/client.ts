@@ -23,7 +23,7 @@ export class Ceo {
       host,
       grpc.credentials.createInsecure()
     );
-    this.subscriptions = new Map(); // Para armazenar as inscrições ativas
+    this.subscriptions = new Map();
   }
 
   pub(topic: string, callback: () => string) {
@@ -61,8 +61,8 @@ export class Ceo {
   unsub(topic: string) {
     const call = this.subscriptions.get(topic);
     if (call) {
-      call.cancel(); // Cancela a assinatura
-      this.subscriptions.delete(topic); // Remove a assinatura do mapa
+      call.cancel();
+      this.subscriptions.delete(topic);
       console.log(`Unsubscribed from topic: ${topic}`);
     } else {
       console.warn(`No subscription found for topic: ${topic}`);
