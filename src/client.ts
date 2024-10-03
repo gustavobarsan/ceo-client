@@ -57,15 +57,4 @@ export class Ceo {
       console.error(`Error in subscription for topic ${topic}:`, error);
     });
   }
-
-  unsub(topic: string) {
-    const call = this.subscriptions.get(topic);
-    if (call) {
-      call.cancel();
-      this.subscriptions.delete(topic);
-      console.log(`Unsubscribed from topic: ${topic}`);
-    } else {
-      console.warn(`No subscription found for topic: ${topic}`);
-    }
-  }
 }
