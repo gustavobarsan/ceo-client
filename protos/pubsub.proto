@@ -19,5 +19,5 @@ message SubscribeResponse {
 
 service PubSubService {
   rpc Publish(PublishRequest) returns (google.protobuf.Empty);
-  rpc Subscribe(stream SubscribeRequest) returns (stream SubscribeResponse);
+  rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse);
 }
